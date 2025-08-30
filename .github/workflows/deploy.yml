@@ -21,10 +21,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
           cache-dependency-path: 'web/package-lock.json'
 
@@ -53,6 +53,10 @@ jobs:
         run: |
           cd web
           npm run build
+          echo "Files in dist after build:"
+          ls -la dist/
+          echo "Checking callback.html exists:"
+          test -f dist/callback.html && echo "✅ callback.html found" || echo "❌ callback.html missing"
 
       - name: Create CNAME file for custom domain
         run: |
