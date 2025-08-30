@@ -43,7 +43,7 @@ jobs:
           echo "VITE_APP_NAME=Mycelium Chat" >> .env
           echo "VITE_TF_CONNECT_APPID=${{ secrets.VITE_APP_DOMAIN }}" >> .env
           echo "VITE_TF_CONNECT_PUBLICKEY=WhBv5majL0aNLsTqsvlRSBBiScAeOYVs1gbtX55AQCI=" >> .env
-          echo "VITE_CALLBACK_URL=/src/callback.html" >> .env
+          echo "VITE_CALLBACK_URL=/callback.html" >> .env
           echo "VITE_MYCELIUM_API_URL=http://localhost:8989" >> .env
           echo "VITE_DEMO_MODE=false" >> .env
           echo "VITE_DEBUG_LOGGING=false" >> .env
