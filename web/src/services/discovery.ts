@@ -8,26 +8,24 @@ import type {
   TFConnectProfile 
 } from '../types';
 import { MyceliumAPI } from './mycelium';
-import { TFConnectAuth } from './tfconnect';
+import { tfConnectAuth } from './tfconnect';
 
 export class UserDiscoveryService {
   private myceliumAPI: MyceliumAPI;
-  private tfConnectAuth: TFConnectAuth;
   private currentProfile: MyceliumChatProfile | null = null;
   private discoveredUsers = new Map<string, MyceliumChatProfile>();
-  private announcementInterval: NodeJS.Timeout | null = null;
+  private announcementInterval: number | null = null;
   private directoryTopic = 'mycelium-chat.directory';
 
   constructor() {
     this.myceliumAPI = new MyceliumAPI();
-    this.tfConnectAuth = new TFConnectAuth();
   }
 
   /**
    * Initialize discovery service with user profile
    */
   async initialize(tfProfile: TFConnectProfile): Promise<void> {
-    this.currentProfile = this.tfConnectAuth.createMyceliumProfile(tfProfile);
+    this.currentProfile = tfConnectAuth.createMyceliumProfile(tfProfile);
     
     // Store profile locally
     localStorage.setItem('mycelium_chat_profile', JSON.stringify(this.currentProfile));
@@ -56,7 +54,7 @@ export class UserDiscoveryService {
         lastSeen: Date.now()
       },
       timestamp: Date.now(),
-      signature: await this.tfConnectAuth.sign(JSON.stringify(this.currentProfile)),
+      signature: await tfConnectAuth.sign(JSON.stringify(this.currentProfile)),
       ttl: 300 // 5 minutes
     };
 
@@ -229,7 +227,7 @@ export class UserDiscoveryService {
     }
 
     // Verify signature
-    const isValid = await this.tfConnectAuth.verify(
+    const isValid = await tfConnectAuth.verify(
       JSON.stringify(announcement.profile),
       announcement.signature,
       announcement.profile.publicKey

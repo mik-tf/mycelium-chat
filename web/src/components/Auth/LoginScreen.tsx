@@ -28,25 +28,38 @@ export const LoginScreen: React.FC = () => {
             </ul>
           </div>
 
-          <button
-            onClick={login}
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
-          >
-            {loading ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                <span>Connecting...</span>
-              </>
-            ) : (
-              <>
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clipRule="evenodd" />
-                </svg>
-                <span>Login with ThreeFold Connect</span>
-              </>
-            )}
-          </button>
+          <div className="space-y-3">
+            <div className="space-y-3">
+              <button
+                onClick={login}
+                disabled={loading}
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+              >
+                {loading ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                    </svg>
+                    <span>Login with ThreeFold Connect</span>
+                  </>
+                )}
+              </button>
+              <div className="text-center text-sm text-gray-600">
+                <p>Having trouble with TF Connect? Try the demo mode:</p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                // Demo login for testing
+                window.location.href = window.location.origin + '?demo=true';
+              }}
+              className="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 text-sm"
+            >
+              Demo Login (for testing)
+            </button>
+          </div>
 
           <div className="text-center text-sm text-gray-500">
             <p>
