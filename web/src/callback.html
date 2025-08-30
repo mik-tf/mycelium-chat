@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ThreeFold Connect Callback</title>
-    <script src="https://unpkg.com/@threefoldjimber/threefold_login@1.4.4/dist/threefold_login.umd.js"></script>
+    <script src="https://unpkg.com/@threefoldjimber/threefold_login@1.4.4/dist/threefold_login.umd.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
@@ -25,7 +25,7 @@
                 const threefoldBackend = 'https://login.threefold.me';
                 const appId = 'mycelium-chat';
                 const seedPhrase = 'mycelium chat decentralized messaging app';
-                const redirectUrl = window.location.origin + '/src/callback.html';
+                const redirectUrl = window.location.origin + '/callback.html';
                 const kycBackend = null;
 
                 console.log('⚙️ Initializing TF Connect with:', {
@@ -75,20 +75,13 @@
 
                 console.log('✅ Stored auth result in localStorage, redirecting to main app...');
                 
-                // Redirect back to main app (handle both relative and absolute paths)
-                const mainAppUrl = window.location.origin + (window.location.pathname.includes('/src/') ? '/' : '/');
+                // Redirect back to main app
+                const mainAppUrl = window.location.origin + '/';
+                console.log('🔄 Redirecting to main app:', mainAppUrl);
                 window.location.href = mainAppUrl;
                 
-                // Fallback: try postMessage if this is still a popup
-                if (window.opener) {
-                    console.log('📤 Also sending postMessage to parent window...');
-                    window.opener.postMessage({
-                        message: 'threefoldLoginRedirectSuccess',
-                        profileData: completeProfile,
-                        state: state
-                    }, window.location.origin);
-                    window.close();
-                }
+                // Don't try to close window - this causes the error
+                // Just rely on the redirect to main app
             } catch (error) {
                 console.error('TF Connect callback error:', error);
                 
