@@ -47,10 +47,6 @@ npm run dev
 - [User Discovery System](./docs/user-discovery.md)
 - [Development Guide](./docs/development.md)
 
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md) for details.
-
 ## License
 
 Licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for details.
