@@ -14,24 +14,19 @@ This guide covers deploying the Mycelium Chat web application to GitHub Pages.
 
 1. **Go to your GitHub repository** → Settings → Secrets and variables → Actions
 
-2. **Add the following Repository Secrets**:
-   ```
-   VITE_APP_DOMAIN=your-domain.com
-   VITE_APP_NAME=Mycelium Chat
-   VITE_TF_CONNECT_APPID=your-domain.com
-   VITE_TF_CONNECT_PUBLICKEY=your-tf-connect-public-key
-   VITE_CALLBACK_URL=/src/callback.html
-   VITE_MYCELIUM_API_URL=http://localhost:8989
-   VITE_DEMO_MODE=false
-   VITE_DEBUG_LOGGING=false
-   VITE_BASE_URL=/
-   ```
+2. **Add this Repository Secret**:
 
-3. **Example for subdomain**:
+- `VITE_APP_DOMAIN`: Your domain (e.g., `chat.yourdomain.com`)
+
+The workflow automatically configures:
+- App name as "Mycelium Chat"
+- TF Connect App ID using your domain
+- TF Connect public key (hardcoded for simplicity)
+- Other standard configuration values
+
+3. **Example**:
    ```
    VITE_APP_DOMAIN=chat.your-domain.com
-   VITE_TF_CONNECT_APPID=chat.your-domain.com
-   VITE_TF_CONNECT_PUBLICKEY=your-tf-connect-public-key
    ```
 
 ## Step 2: GitHub Pages Setup
