@@ -171,15 +171,17 @@ class TFConnectService {
     // Store state for callback validation
     window.localStorage.setItem('tfconnect_state', state);
     
-    // Use EXACT same parameters as forum.threefold.io but match our localhost domain
-    const publicKey = 'WhBv5majL0aNLsTqsvlRSBBiScAeOYVs1gbtX55AQCI='; // Same as forum
+    // Use environment variables for domain configuration
+    const appDomain = import.meta.env.VITE_TF_CONNECT_APPID || window.location.host;
+    const publicKey = import.meta.env.VITE_TF_CONNECT_PUBLICKEY || 'WhBv5majL0aNLsTqsvlRSBBiScAeOYVs1gbtX55AQCI=';
+    const callbackUrl = import.meta.env.VITE_CALLBACK_URL || '/src/callback.html';
     const scope = JSON.stringify({ 
       user: true, 
       email: true 
     });
     
-    // Build login URL with localhost appid to match our domain
-    const loginUrl = `https://login.threefold.me/?appid=localhost:5173&publickey=${encodeURIComponent(publicKey)}&redirecturl=${encodeURIComponent('/src/callback.html')}&scope=${encodeURIComponent(scope)}&state=${state}`;
+    // Build login URL with configurable domain
+    const loginUrl = `https://login.threefold.me/?appid=${encodeURIComponent(appDomain)}&publickey=${encodeURIComponent(publicKey)}&redirecturl=${encodeURIComponent(callbackUrl)}&scope=${encodeURIComponent(scope)}&state=${state}`;
     
     console.log('🔗 Redirecting to TF Connect (forum-style):', loginUrl);
     
