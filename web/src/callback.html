@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThreeFold Connect Callback</title>
+    <script src="https://unpkg.com/@threefoldjimber/threefold_login@1.4.4/dist/threefold_login.umd.js"></script>
+</head>
+<body>
+    <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+        <h2>Processing login...</h2>
+        <p>Please wait while we complete your authentication.</p>
+    </div>
+
+    <script>
+        console.log('🔄 TF Connect callback.html loaded!');
+        console.log('📍 Current URL:', window.location.href);
+        console.log('🔗 Opener exists:', !!window.opener);
+        
+        async function handleCallback() {
+            try {
+                console.log('🚀 Starting TF Connect callback processing...');
+                
+                // Initialize ThreeFold Login
+                const threefoldBackend = 'https://login.threefold.me';
+                const appId = 'mycelium-chat';
+                const seedPhrase = 'mycelium chat decentralized messaging app';
+                const redirectUrl = window.location.origin + '/src/callback.html';
+                const kycBackend = null;
+
+                console.log('⚙️ Initializing TF Connect with:', {
+                    threefoldBackend,
+                    appId,
+                    redirectUrl
+                });
+
+                const login = new ThreefoldLogin.ThreefoldLogin(
+                    threefoldBackend,
+                    appId,
+                    seedPhrase,
+                    redirectUrl,
+                    kycBackend
+                );
+
+                await login.init();
+                console.log('✅ TF Connect initialized successfully');
+
+                // Get state from localStorage
+                const state = window.localStorage.getItem('tfconnect_state');
+                const redirectUrl_obj = new URL(window.location.href);
+
+                // Parse and validate the redirect URL
+                console.log('🔍 Parsing redirect URL with state:', state);
+                const profileData = await login.parseAndValidateRedirectUrl(redirectUrl_obj, state);
+                console.log('📋 Raw profile data from TF Connect:', profileData);
+                
+                // Create a complete profile with email-only scope
+                const completeProfile = {
+                    doubleName: profileData.doubleName || profileData.email?.split('@')[0] || 'User',
+                    email: profileData.email,
+                    id: profileData.id || profileData.email || 'user',
+                    signedAttempt: profileData.signedAttempt || 'authenticated',
+                    publicKey: profileData.publicKey || '',
+                    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${profileData.email || 'user'}`
+                };
+                
+                console.log('✨ Complete profile created:', completeProfile);
+                
+                // Send success data back to parent window
+                if (window.opener) {
+                    console.log('📤 Sending postMessage to parent window...');
+                    window.opener.postMessage({
+                        message: 'threefoldLoginRedirectSuccess',
+                        profileData: completeProfile,
+                        state: state
+                    }, window.location.origin);
+                    console.log('✅ PostMessage sent successfully!');
+                } else {
+                    console.error('❌ No window.opener found!');
+                }
+                
+                window.close();
+            } catch (error) {
+                console.error('TF Connect callback error:', error);
+                
+                // Send error back to parent window
+                if (window.opener) {
+                    window.opener.postMessage({
+                        message: 'threefoldLoginRedirectError',
+                        error: error.message || 'Authentication failed'
+                    }, window.location.origin);
+                }
+                
+                window.close();
+            }
+        }
+
+        // Run the callback handler
+        handleCallback();
+    </script>
+</body>
+</html>
