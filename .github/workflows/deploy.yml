@@ -57,6 +57,9 @@ jobs:
           ls -la dist/
           echo "Checking callback.html exists:"
           test -f dist/callback.html && echo "✅ callback.html found" || echo "❌ callback.html missing"
+          echo "Manually copying callback.html to dist:"
+          cp public/callback.html dist/callback.html
+          echo "✅ callback.html copied to dist/"
 
       - name: Create CNAME file for custom domain
         run: |
