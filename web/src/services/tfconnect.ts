@@ -34,7 +34,6 @@ const exchangeCodeForProfile = async (_code: string): Promise<TFConnectProfile> 
     id: `tf_${Date.now()}`,
     name: 'Demo User',
     email: 'demo@example.com',
-    publicKey: `pk_${Math.random().toString(36).substring(2)}`,
     avatar: `https://api.dicebear.com/7.x/avataars/svg?seed=${Date.now()}`
   };
 };
@@ -77,7 +76,122 @@ class TFConnectService {
     });
   }
 
+  async loginDirect(): Promise<TFConnectLoginResult> {
+    console.log('🚀 Attempting direct TF Connect library authentication...');
+    
+    try {
+      // Initialize TF Connect library directly
+      const threefoldBackend = 'https://login.threefold.me';
+      const appId = 'mycelium-chat';
+      const seedPhrase = 'mycelium chat decentralized messaging app';
+      const redirectUrl = `${window.location.origin}/src/callback.html`;
+      const kycBackend = null;
+
+      // @ts-ignore - Using global ThreefoldLogin from script tag
+      const login = new window.ThreefoldLogin.ThreefoldLogin(
+        threefoldBackend,
+        appId,
+        seedPhrase,
+        redirectUrl,
+        kycBackend
+      );
+
+      await login.init();
+      console.log('✅ TF Connect library initialized');
+
+      // Try to get profile directly if user is already logged in
+      try {
+        const profile = await login.getProfile();
+        if (profile) {
+          console.log('📋 Found existing TF Connect profile:', profile);
+          return {
+            user: {
+              doubleName: profile.doubleName || profile.email?.split('@')[0] || 'User',
+              email: profile.email || 'user@threefold.me',
+              id: profile.id || profile.doubleName || 'user'
+            },
+            signedAttempt: profile.signedAttempt || 'direct_authenticated'
+          };
+        }
+      } catch (e) {
+        console.log('No existing profile found, proceeding with login...');
+      }
+
+      // Try different direct methods available in the library
+      const methods = ['login', 'authenticate', 'loginDirect', 'getLoginUrl', 'generateLoginAttempt'];
+      
+      for (const method of methods) {
+        if (login[method] && typeof login[method] === 'function') {
+          console.log(`🔑 Trying method: ${method}`);
+          try {
+            const result = await login[method]();
+            console.log(`✅ Method ${method} returned:`, result);
+            
+            if (result && (result.doubleName || result.email || result.id)) {
+              return {
+                user: {
+                  doubleName: result.doubleName || result.email?.split('@')[0] || 'User',
+                  email: result.email || 'user@threefold.me',
+                  id: result.id || result.doubleName || 'user'
+                },
+                signedAttempt: result.signedAttempt || 'direct_authenticated'
+              };
+            }
+          } catch (e) {
+            console.log(`Method ${method} failed:`, e);
+          }
+        }
+      }
+
+      // Try to inspect all available methods
+      console.log('📋 Available TF Connect methods:', Object.getOwnPropertyNames(login));
+      console.log('📋 Available TF Connect prototype methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(login)));
+
+      // If no direct methods, fall back to popup approach
+      console.log('⚠️ No direct login methods found, falling back to popup...');
+      return this.loginPopup();
+
+    } catch (error) {
+      console.error('❌ Direct TF Connect login failed:', error);
+      // Fall back to popup approach
+      return this.loginPopup();
+    }
+  }
+
   async login(): Promise<TFConnectLoginResult> {
+    // Use same-page redirect like forum.threefold.io
+    return this.loginSamePage();
+  }
+
+  async loginSamePage(): Promise<TFConnectLoginResult> {
+    console.log('🚀 Starting same-page TF Connect authentication...');
+    
+    const state = generateState();
+    
+    // Store state for callback validation
+    window.localStorage.setItem('tfconnect_state', state);
+    
+    // Use EXACT same parameters as forum.threefold.io but match our localhost domain
+    const publicKey = 'WhBv5majL0aNLsTqsvlRSBBiScAeOYVs1gbtX55AQCI='; // Same as forum
+    const scope = JSON.stringify({ 
+      user: true, 
+      email: true 
+    });
+    
+    // Build login URL with localhost appid to match our domain
+    const loginUrl = `https://login.threefold.me/?appid=localhost:5173&publickey=${encodeURIComponent(publicKey)}&redirecturl=${encodeURIComponent('/src/callback.html')}&scope=${encodeURIComponent(scope)}&state=${state}`;
+    
+    console.log('🔗 Redirecting to TF Connect (forum-style):', loginUrl);
+    
+    // Redirect the current page instead of opening popup
+    window.location.href = loginUrl;
+    
+    // This promise will never resolve since we're redirecting away
+    // The callback.html will handle the authentication result
+    return new Promise(() => {});
+  }
+
+  async loginPopup(): Promise<TFConnectLoginResult> {
     if (this.currentLoginPromise) {
       return this.currentLoginPromise;
     }
@@ -97,8 +211,7 @@ class TFConnectService {
       
       const loginUrl = `https://login.threefold.me/?appid=mycelium-chat&redirecturl=${encodeURIComponent(redirectUrl)}&scope=${encodeURIComponent(fullScope)}&state=${state}`;
       
-      console.log('Opening TF Connect login:', loginUrl);
-      console.log('Expected redirect URL:', redirectUrl);
+      console.log('Opening TF Connect login popup:', loginUrl);
 
       // Open popup
       const popup = window.open(loginUrl, 'tfconnect', 'width=400,height=600');

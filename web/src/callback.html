@@ -66,20 +66,29 @@
                 
                 console.log('✨ Complete profile created:', completeProfile);
                 
-                // Send success data back to parent window
+                // Store result in localStorage for same-page redirect flow
+                window.localStorage.setItem('tfconnect_auth_result', JSON.stringify({
+                    success: true,
+                    profileData: completeProfile,
+                    timestamp: Date.now()
+                }));
+
+                console.log('✅ Stored auth result in localStorage, redirecting to main app...');
+                
+                // Redirect back to main app (handle both relative and absolute paths)
+                const mainAppUrl = window.location.origin + (window.location.pathname.includes('/src/') ? '/' : '/');
+                window.location.href = mainAppUrl;
+                
+                // Fallback: try postMessage if this is still a popup
                 if (window.opener) {
-                    console.log('📤 Sending postMessage to parent window...');
+                    console.log('📤 Also sending postMessage to parent window...');
                     window.opener.postMessage({
                         message: 'threefoldLoginRedirectSuccess',
                         profileData: completeProfile,
                         state: state
                     }, window.location.origin);
-                    console.log('✅ PostMessage sent successfully!');
-                } else {
-                    console.error('❌ No window.opener found!');
+                    window.close();
                 }
-                
-                window.close();
             } catch (error) {
                 console.error('TF Connect callback error:', error);
                 

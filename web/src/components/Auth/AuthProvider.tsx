@@ -85,41 +85,72 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // Log all URL parameters for debugging
     console.log('Current URL:', window.location.href);
-    console.log('All URL params:', Object.fromEntries(urlParams));
+    console.log('All URL params:', Object.fromEntries(urlParams.entries()));
     
-    // TF Connect sends back different parameters after successful authentication
-    // Check for the actual TF Connect success callback parameters
-    const signedAttempt = urlParams.get('signedAttempt');
-    const doubleName = urlParams.get('doubleName'); 
-    const publicKey = urlParams.get('publicKey');
-    const state = urlParams.get('state');
+    // Check for stored TF Connect authentication result (same-page redirect)
+    const storedResult = window.localStorage.getItem('tfconnect_auth_result');
+    if (storedResult) {
+      try {
+        const authResult = JSON.parse(storedResult);
+        console.log('🔍 Found stored TF Connect auth result:', authResult);
+        
+        // Clear the stored result
+        window.localStorage.removeItem('tfconnect_auth_result');
+        
+        // Check if result is recent (within 5 minutes)
+        const isRecent = (Date.now() - authResult.timestamp) < 5 * 60 * 1000;
+        
+        if (authResult.success && authResult.profileData && isRecent) {
+          console.log('✅ Processing stored TF Connect authentication...');
+          const profile = authResult.profileData;
+          
+          setTfProfile({
+            id: profile.id,
+            name: profile.doubleName,
+            email: profile.email,
+            publicKey: profile.publicKey,
+            avatar: profile.avatar
+          });
+          setMyceliumProfile(tfConnectAuth.createMyceliumProfile({
+            id: profile.id,
+            name: profile.doubleName,
+            email: profile.email,
+            publicKey: profile.publicKey,
+            avatar: profile.avatar
+          }));
+          setIsAuthenticated(true);
+          return;
+        }
+      } catch (e) {
+        console.error('Error parsing stored auth result:', e);
+        window.localStorage.removeItem('tfconnect_auth_result');
+      }
+    }
     
-    // Also check for other possible TF Connect callback formats
-    const username = urlParams.get('username');
-    const email = urlParams.get('email');
-    const pubkey = urlParams.get('pubkey');
+    // Check for TF Connect callback parameters (fallback)
+    const tfConnectParams = {
+      signedAttempt: urlParams.get('signedAttempt'),
+      doubleName: urlParams.get('doubleName'),
+      publicKey: urlParams.get('publicKey'),
+      username: urlParams.get('username'),
+      email: urlParams.get('email'),
+      pubkey: urlParams.get('pubkey'),
+      state: urlParams.get('state')
+    };
     
-    console.log('TF Connect callback parameters:', {
-      signedAttempt: signedAttempt ? signedAttempt.substring(0, 50) + '...' : null,
-      doubleName,
-      publicKey: publicKey ? publicKey.substring(0, 20) + '...' : null,
-      username,
-      email,
-      pubkey: pubkey ? pubkey.substring(0, 20) + '...' : null,
-      state
-    });
+    console.log('TF Connect callback parameters:', tfConnectParams);
     
     // Check if we have TF Connect callback data (either format)
-    if ((signedAttempt && doubleName && publicKey && state) || 
-        (username && email && pubkey && state)) {
+    if ((tfConnectParams.signedAttempt && tfConnectParams.doubleName && tfConnectParams.publicKey && tfConnectParams.state) || 
+        (tfConnectParams.username && tfConnectParams.email && tfConnectParams.pubkey && tfConnectParams.state)) {
       
-      const finalDoubleName = doubleName || username;
-      const finalPublicKey = publicKey || pubkey;
+      const finalDoubleName = tfConnectParams.doubleName || tfConnectParams.username;
+      const finalPublicKey = tfConnectParams.publicKey || tfConnectParams.pubkey;
       
       console.log('Processing TF Connect callback for:', finalDoubleName);
       
       // Process the TF Connect callback
-      await processTFConnectCallback(signedAttempt || 'mock', finalDoubleName!, finalPublicKey!, state!);
+      await processTFConnectCallback(tfConnectParams.signedAttempt || 'mock', finalDoubleName!, finalPublicKey!, tfConnectParams.state!);
       return;
     }
     
