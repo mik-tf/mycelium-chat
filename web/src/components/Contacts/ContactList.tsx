@@ -20,6 +20,8 @@ export const ContactList: React.FC<ContactListProps> = ({
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [_discoveryService] = useState(() => new UserDiscoveryService());
+  const [searchResults, setSearchResults] = useState<Contact[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     loadContacts();
@@ -31,6 +33,30 @@ export const ContactList: React.FC<ContactListProps> = ({
     const stored = localStorage.getItem('mycelium_contacts');
     if (stored) {
       setContacts(JSON.parse(stored));
+    }
+    
+    // Add some demo contacts for testing
+    const demoContacts: Contact[] = [
+      {
+        id: 'demo-user-1',
+        profile: {
+          tfConnectId: 'demo.3bot',
+          myceliumAddress: 'demo-mycelium-address',
+          displayName: 'Demo User',
+          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=demo',
+          status: 'online',
+          visibility: 'public',
+          groups: [],
+          lastSeen: Date.now(),
+          publicKey: 'demo-public-key'
+        },
+        unreadCount: 0
+      }
+    ];
+    
+    if (!stored || JSON.parse(stored).length === 0) {
+      setContacts(demoContacts);
+      localStorage.setItem('mycelium_contacts', JSON.stringify(demoContacts));
     }
   };
 
@@ -45,6 +71,55 @@ export const ContactList: React.FC<ContactListProps> = ({
     return () => {
       window.removeEventListener('user_discovered', handleUserDiscovered as EventListener);
     };
+  };
+
+  const handleSearch = async (term: string) => {
+    setSearchTerm(term);
+    
+    if (!term.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    
+    setIsSearching(true);
+    
+    // Simulate TF Connect ID search
+    if (term.includes('.3bot') || term.includes('3bot')) {
+      // Mock search result for TF Connect IDs
+      const mockResult: Contact = {
+        id: `search-${term}`,
+        profile: {
+          tfConnectId: term.includes('.3bot') ? term : `${term}.3bot`,
+          myceliumAddress: `mock-address-${term}`,
+          displayName: term.replace('.3bot', ''),
+          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${term}`,
+          status: 'offline',
+          visibility: 'public',
+          groups: [],
+          lastSeen: Date.now(),
+          publicKey: 'mock-public-key'
+        },
+        unreadCount: 0
+      };
+      
+      setTimeout(() => {
+        setSearchResults([mockResult]);
+        setIsSearching(false);
+      }, 500);
+    } else {
+      setTimeout(() => {
+        setSearchResults([]);
+        setIsSearching(false);
+      }, 500);
+    }
+  };
+  
+  const addContactFromSearch = (contact: Contact) => {
+    const updatedContacts = [...contacts, contact];
+    setContacts(updatedContacts);
+    localStorage.setItem('mycelium_contacts', JSON.stringify(updatedContacts));
+    setSearchResults([]);
+    setSearchTerm('');
   };
 
   const addOrUpdateContact = (profile: MyceliumChatProfile) => {
@@ -74,9 +149,11 @@ export const ContactList: React.FC<ContactListProps> = ({
     });
   };
 
-  const filteredContacts = contacts.filter(contact =>
-    contact.profile.displayName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredContacts = searchTerm ? 
+    contacts.filter(contact =>
+      contact.profile.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.profile.tfConnectId.toLowerCase().includes(searchTerm.toLowerCase())
+    ) : contacts;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -94,50 +171,81 @@ export const ContactList: React.FC<ContactListProps> = ({
         <h2 className="text-lg font-semibold text-gray-900 mb-3">
           Contacts
         </h2>
+      </div>
+      
+      <div className="p-4">
         <Search
-          placeholder="Search contacts..."
+          placeholder="Search contacts or add TF Connect ID (e.g., username.3bot)..."
           value={searchTerm}
-          onChange={(value) => setSearchTerm(value)}
+          onChange={handleSearch}
         />
+        
+        {/* Search Results */}
+        {searchResults.length > 0 && (
+          <div className="mt-2 border border-gray-200 rounded-lg bg-white">
+            <div className="p-2 text-xs text-gray-500 border-b border-gray-100">
+              Search Results - Click to add:
+            </div>
+            {searchResults.map((result) => (
+              <div
+                key={result.id}
+                onClick={() => addContactFromSearch(result)}
+                className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+              >
+                <div className="flex items-center space-x-3">
+                  <Avatar
+                    src={result.profile.avatar}
+                    name={result.profile.displayName}
+                    size="sm"
+                  />
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">{result.profile.displayName}</div>
+                    <div className="text-xs text-blue-600">{result.profile.tfConnectId}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {isSearching && (
+          <div className="mt-2 p-3 text-center text-sm text-gray-500">
+            Searching for TF Connect users...
+          </div>
+        )}
       </div>
 
       {/* Contact List */}
       <div className="flex-1 overflow-y-auto">
         <ConversationList>
-          {filteredContacts.length === 0 ? (
-            <div className="p-4 text-center text-gray-500">
-              <div className="mb-2">
-                <svg className="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <p className="text-sm">No contacts found</p>
-              <p className="text-xs mt-1">
-                Users will appear here as they come online
-              </p>
+        {filteredContacts.length === 0 && !searchTerm && (
+          <div className="p-4 text-center text-gray-500 text-sm">
+            No contacts yet. Search for TF Connect IDs to add friends!
+          </div>
+        )}
+        {filteredContacts.map((contact) => (
+          <Conversation
+            key={contact.id}
+            name={contact.profile.displayName}
+            lastSenderName={contact.lastMessage?.sender}
+            info={contact.lastMessage?.message || 'No messages yet'}
+            active={selectedContact?.id === contact.id}
+            onClick={() => onContactSelect(contact)}
+          >
+            <Avatar
+              src={contact.profile.avatar}
+              name={contact.profile.displayName}
+              status={contact.profile.status === 'online' ? 'available' : 'unavailable'}
+            />
+            <Conversation.Content
+              name={contact.profile.displayName}
+              info={contact.profile.tfConnectId}
+            />
+            <div className="absolute bottom-0 right-0">
+              <div className={`w-3 h-3 rounded-full border-2 border-white ${getStatusColor(contact.profile.status)}`} />
             </div>
-          ) : (
-            filteredContacts.map((contact) => (
-              <Conversation
-                key={contact.id}
-                name={contact.profile.displayName}
-                lastSenderName={contact.lastMessage?.sender}
-                info={contact.lastMessage?.message || 'No messages yet'}
-                active={selectedContact?.id === contact.id}
-                unreadCnt={contact.unreadCount}
-                onClick={() => onContactSelect(contact)}
-              >
-                <Avatar
-                  src={contact.profile.avatar}
-                  name={contact.profile.displayName}
-                  status="available"
-                />
-                <div className="absolute bottom-0 right-0">
-                  <div className={`w-3 h-3 rounded-full border-2 border-white ${getStatusColor(contact.profile.status)}`} />
-                </div>
-              </Conversation>
-            ))
-          )}
+          </Conversation>
+        ))}
         </ConversationList>
       </div>
 

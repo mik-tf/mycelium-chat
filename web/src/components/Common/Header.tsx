@@ -3,7 +3,7 @@ import { useAuth } from '../Auth/AuthProvider';
 import { MyceliumAPI } from '../../services/mycelium';
 
 export const Header: React.FC = () => {
-  const { myceliumProfile, logout } = useAuth();
+  const { myceliumProfile, tfProfile, logout } = useAuth();
   const [myceliumStatus, setMyceliumStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [myceliumAPI] = useState(() => new MyceliumAPI());
@@ -84,6 +84,9 @@ export const Header: React.FC = () => {
                 <div className="px-4 py-2 border-b border-gray-100">
                   <p className="text-sm font-medium text-gray-900">
                     {myceliumProfile?.displayName}
+                  </p>
+                  <p className="text-xs text-blue-600 font-medium">
+                    TF Connect: {tfProfile?.id}
                   </p>
                   <p className="text-xs text-gray-500">
                     {myceliumProfile?.myceliumAddress}
