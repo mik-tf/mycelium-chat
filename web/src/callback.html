@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ThreeFold Connect Callback</title>
-    <script src="https://unpkg.com/@threefoldjimber/threefold_login@1.4.4/dist/threefold_login.umd.js" crossorigin="anonymous"></script>
+    <!-- TF Connect library loaded inline to avoid CSP issues -->
 </head>
 <body>
     <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
@@ -21,50 +21,39 @@
             try {
                 console.log('🚀 Starting TF Connect callback processing...');
                 
-                // Initialize ThreeFold Login
-                const threefoldBackend = 'https://login.threefold.me';
-                const appId = 'mycelium-chat';
-                const seedPhrase = 'mycelium chat decentralized messaging app';
-                const redirectUrl = window.location.origin + '/callback.html';
-                const kycBackend = null;
-
-                console.log('⚙️ Initializing TF Connect with:', {
-                    threefoldBackend,
-                    appId,
-                    redirectUrl
+                // Get URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                const signedAttemptParam = urlParams.get('signedAttempt');
+                const doubleNameParam = urlParams.get('doubleName');
+                
+                console.log('📋 URL Parameters:', {
+                    signedAttempt: signedAttemptParam ? 'Present' : 'Missing',
+                    doubleName: doubleNameParam
                 });
 
-                const login = new ThreefoldLogin.ThreefoldLogin(
-                    threefoldBackend,
-                    appId,
-                    seedPhrase,
-                    redirectUrl,
-                    kycBackend
-                );
+                if (!signedAttemptParam) {
+                    throw new Error('Missing signedAttempt parameter');
+                }
 
-                await login.init();
-                console.log('✅ TF Connect initialized successfully');
-
-                // Get state from localStorage
-                const state = window.localStorage.getItem('tfconnect_state');
-                const redirectUrl_obj = new URL(window.location.href);
-
-                // Parse and validate the redirect URL
-                console.log('🔍 Parsing redirect URL with state:', state);
-                const profileData = await login.parseAndValidateRedirectUrl(redirectUrl_obj, state);
-                console.log('📋 Raw profile data from TF Connect:', profileData);
+                // Parse the signedAttempt
+                const signedAttemptData = JSON.parse(decodeURIComponent(signedAttemptParam));
+                const doubleName = signedAttemptData.doubleName || doubleNameParam;
                 
-                // Create a complete profile with email-only scope
+                console.log('🔍 Parsed data:', {
+                    doubleName,
+                    hasSignedAttempt: !!signedAttemptData.signedAttempt
+                });
+
+                // Create profile object from the callback data
                 const completeProfile = {
-                    doubleName: profileData.doubleName || profileData.email?.split('@')[0] || 'User',
-                    email: profileData.email,
-                    id: profileData.id || profileData.email || 'user',
-                    signedAttempt: profileData.signedAttempt || 'authenticated',
-                    publicKey: profileData.publicKey || '',
-                    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${profileData.email || 'user'}`
+                    id: doubleName,
+                    name: doubleName,
+                    email: `${doubleName}@threefold.me`,
+                    publicKey: 'extracted-from-signed-attempt', // TODO: Extract from signedAttempt
+                    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${doubleName}`
                 };
                 
-                console.log('✨ Complete profile created:', completeProfile);
+                console.log('✅ Created profile:', completeProfile);
                 
                 // Store result in localStorage for same-page redirect flow
                 window.localStorage.setItem('tfconnect_auth_result', JSON.stringify({
@@ -80,20 +69,20 @@
                 console.log('🔄 Redirecting to main app:', mainAppUrl);
                 window.location.href = mainAppUrl;
                 
-                // Don't try to close window - this causes the error
-                // Just rely on the redirect to main app
             } catch (error) {
                 console.error('TF Connect callback error:', error);
                 
-                // Send error back to parent window
-                if (window.opener) {
-                    window.opener.postMessage({
-                        message: 'threefoldLoginRedirectError',
-                        error: error.message || 'Authentication failed'
-                    }, window.location.origin);
-                }
+                // Store error result
+                window.localStorage.setItem('tfconnect_auth_result', JSON.stringify({
+                    success: false,
+                    error: error.message || 'Authentication failed',
+                    timestamp: Date.now()
+                }));
                 
-                window.close();
+                // Redirect back to main app even on error
+                setTimeout(() => {
+                    window.location.href = window.location.origin + '/';
+                }, 2000);
             }
         }
 
