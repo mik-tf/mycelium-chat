@@ -64,6 +64,12 @@ jobs:
             echo "${{ secrets.VITE_APP_DOMAIN }}" > web/dist/CNAME
           fi
 
+      - name: Debug dist contents before upload
+        run: |
+          echo "Contents of web/dist before upload:"
+          find web/dist -type f -exec ls -la {} \;
+          echo "Total files: $(find web/dist -type f | wc -l)"
+          
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
