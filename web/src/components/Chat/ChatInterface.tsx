@@ -9,7 +9,7 @@ import {
   Avatar
 } from '@chatscope/chat-ui-kit-react';
 import { v4 as uuid } from 'uuid';
-import type { ChatMessage, Contact, MyceliumChatProfile } from '../../types';
+import type { ChatMessage, Contact } from '../../types';
 import { MyceliumAPI } from '../../services/mycelium';
 import { useAuth } from '../Auth/AuthProvider';
 
@@ -20,11 +20,11 @@ interface ChatInterfaceProps {
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   selectedContact,
-  onContactSelect
+  onContactSelect: _onContactSelect
 }) => {
   const { myceliumProfile } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isTyping, setIsTyping] = useState(false);
+  const [isTyping, _setIsTyping] = useState(false);
   const [myceliumAPI] = useState(() => new MyceliumAPI());
   const messageListRef = useRef<any>(null);
 
@@ -114,7 +114,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       // Update message status
       const updatedMessages = messages.map(msg => 
         msg.id === messageId 
-          ? { ...msg, status: result.success ? 'sent' : 'failed' }
+          ? { ...msg, status: (result.success ? 'sent' : 'failed') as ChatMessage['status'] }
           : msg
       );
       setMessages(updatedMessages);
@@ -127,7 +127,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       
       // Mark message as failed
       const updatedMessages = messages.map(msg => 
-        msg.id === messageId ? { ...msg, status: 'failed' } : msg
+        msg.id === messageId ? { ...msg, status: 'failed' as ChatMessage['status'] } : msg
       );
       setMessages(updatedMessages);
       

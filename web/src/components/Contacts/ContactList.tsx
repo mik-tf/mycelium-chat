@@ -19,7 +19,7 @@ export const ContactList: React.FC<ContactListProps> = ({
 }) => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [discoveryService] = useState(() => new UserDiscoveryService());
+  const [_discoveryService] = useState(() => new UserDiscoveryService());
 
   useEffect(() => {
     loadContacts();

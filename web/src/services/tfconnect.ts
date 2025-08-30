@@ -27,16 +27,7 @@ const formatAsIPv6 = (hash: string): string => {
   return `2001:db8::${groups.join(':')}`;
 };
 
-const exchangeCodeForProfile = async (_code: string): Promise<TFConnectProfile> => {
-  // In real implementation, this would call the TF Connect API
-  // For development, return a mock profile
-  return {
-    id: `tf_${Date.now()}`,
-    name: 'Demo User',
-    email: 'demo@example.com',
-    avatar: `https://api.dicebear.com/7.x/avataars/svg?seed=${Date.now()}`
-  };
-};
+// Removed unused exchangeCodeForProfile function
 
 export interface TFConnectUser {
   doubleName: string;
@@ -400,7 +391,7 @@ class TFConnectService {
     return this.currentLoginPromise;
   }
 
-  async verifySignedAttempt(signedAttempt: string, doubleName: string): Promise<boolean> {
+  async verifySignedAttempt(_signedAttempt: string, doubleName: string): Promise<boolean> {
     // For now, skip verification - the TF Connect callback handles validation
     console.log('Verifying signed attempt for:', doubleName);
     return true;
@@ -430,7 +421,7 @@ export const tfConnectAuth = {
   /**
    * Handle authentication callback
    */
-  async handleCallback(code: string, state: string): Promise<{
+  async handleCallback(_code: string, state: string): Promise<{
     success: boolean;
     profile?: TFConnectProfile;
     error?: string;

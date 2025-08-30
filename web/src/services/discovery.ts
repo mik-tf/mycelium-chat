@@ -1,13 +1,7 @@
 // User discovery service using Mycelium topics
-import { v4 as uuid } from 'uuid';
-import type { 
-  MyceliumChatProfile, 
-  UserAnnouncement, 
-  DiscoveryQuery, 
-  DiscoveryResponse,
-  TFConnectProfile 
-} from '../types';
 import { MyceliumAPI } from './mycelium';
+import type { MyceliumChatProfile, UserAnnouncement, DiscoveryQuery, DiscoveryResponse, UserStatus } from '../types';
+import { v4 as uuid } from 'uuid';
 import { tfConnectAuth } from './tfconnect';
 
 export class UserDiscoveryService {
@@ -24,7 +18,7 @@ export class UserDiscoveryService {
   /**
    * Initialize discovery service with user profile
    */
-  async initialize(tfProfile: TFConnectProfile): Promise<void> {
+  async initialize(tfProfile: any): Promise<void> {
     this.currentProfile = tfConnectAuth.createMyceliumProfile(tfProfile);
     
     // Store profile locally
@@ -83,7 +77,10 @@ export class UserDiscoveryService {
   }): Promise<MyceliumChatProfile[]> {
     const query: DiscoveryQuery = {
       type: 'discovery_query',
-      filters: filters || {},
+      filters: {
+        ...filters,
+        status: filters?.status as UserStatus[] | undefined
+      },
       requestId: uuid(),
       requester: this.currentProfile?.myceliumAddress || ''
     };
@@ -212,7 +209,7 @@ export class UserDiscoveryService {
           await this.handleDiscoveryQuery(payload as DiscoveryQuery, message.srcIp);
           break;
         case 'discovery_response':
-          await this.handleDiscoveryResponse(payload as DiscoveryResponse);
+          await this.handleDiscoveryResponse(payload as DiscoveryResponse, message.srcIp);
           break;
       }
     } catch (error) {
@@ -252,7 +249,7 @@ export class UserDiscoveryService {
     }));
   }
 
-  private async handleDiscoveryQuery(query: DiscoveryQuery, requesterIp: string): Promise<void> {
+  private async handleDiscoveryQuery(query: DiscoveryQuery, _requesterIp: string): Promise<void> {
     if (!this.currentProfile) return;
 
     // Check if we should respond to this query
@@ -272,15 +269,21 @@ export class UserDiscoveryService {
     );
   }
 
-  private async handleDiscoveryResponse(response: DiscoveryResponse): Promise<void> {
-    for (const profile of response.profiles) {
-      if (profile.tfConnectId !== this.currentProfile?.tfConnectId) {
-        this.discoveredUsers.set(profile.tfConnectId, profile);
-        
-        window.dispatchEvent(new CustomEvent('user_discovered', {
-          detail: profile
-        }));
+  private async handleDiscoveryResponse(message: any, _requesterIp: string): Promise<void> {
+    try {
+      const payload = JSON.parse(atob(message.payload));
+      
+      for (const profile of payload.profiles) {
+        if (profile.tfConnectId !== this.currentProfile?.tfConnectId) {
+          this.discoveredUsers.set(profile.tfConnectId, profile);
+          
+          window.dispatchEvent(new CustomEvent('user_discovered', {
+            detail: profile
+          }));
+        }
       }
+    } catch (error) {
+      console.warn('Failed to handle discovery response:', error);
     }
   }
 

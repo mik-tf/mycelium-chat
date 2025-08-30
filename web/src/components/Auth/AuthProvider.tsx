@@ -198,7 +198,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const processTFConnectCallback = async (signedAttempt: string, doubleName: string, publicKey: string, state: string) => {
+  const processTFConnectCallback = async (_signedAttempt: string, doubleName: string, publicKey: string, state: string) => {
     try {
       // Verify state parameter
       const storedState = localStorage.getItem('tf_connect_state');
