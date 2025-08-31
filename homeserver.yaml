@@ -1,0 +1,49 @@
+server_name: "localhost"
+pid_file: /tmp/homeserver.pid
+listeners:
+  - port: 8008
+    tls: false
+    type: http
+    x_forwarded: true
+    resources:
+      - names: [client, federation]
+        compress: false
+
+database:
+  name: sqlite3
+  args:
+    database: /tmp/homeserver.db
+
+log_config: "/data/log.config"
+media_store_path: /tmp/media_store
+registration_shared_secret: "test_secret_for_dev"
+report_stats: false
+macaroon_secret_key: "test_macaroon_secret"
+form_secret: "test_form_secret"
+signing_key_path: "/tmp/localhost.signing.key"
+
+trusted_key_servers:
+  - server_name: "matrix.org"
+
+# Enable registration for development
+enable_registration: true
+enable_registration_without_verification: true
+
+# Disable rate limiting for development
+rc_message:
+  per_second: 1000
+  burst_count: 1000
+
+rc_registration:
+  per_second: 1000
+  burst_count: 1000
+
+rc_login:
+  address:
+    per_second: 1000
+    burst_count: 1000
+  account:
+    per_second: 1000
+    burst_count: 1000
+
+suppress_key_server_warning: true
