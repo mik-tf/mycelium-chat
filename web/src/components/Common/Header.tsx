@@ -10,8 +10,11 @@ export const Header: React.FC = () => {
 
   useEffect(() => {
     checkMyceliumStatus();
-    const interval = setInterval(checkMyceliumStatus, 10000); // Check every 10 seconds
-    return () => clearInterval(interval);
+    // Only check periodically if we're on localhost
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      const interval = setInterval(checkMyceliumStatus, 10000); // Check every 10 seconds
+      return () => clearInterval(interval);
+    }
   }, []);
 
   const checkMyceliumStatus = async () => {

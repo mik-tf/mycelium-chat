@@ -10,6 +10,7 @@ export class MyceliumAPI {
   });
   private isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   private corsBlocked = false;
+  private corsWarningShown = false;
 
   /**
    * Send a message to a specific recipient or broadcast
@@ -183,7 +184,10 @@ export class MyceliumAPI {
   async isAvailable(): Promise<boolean> {
     // If we're on a deployed site (not localhost), Mycelium won't be accessible due to CORS
     if (!this.isLocalhost) {
-      console.warn('Mycelium API not accessible from deployed site due to CORS restrictions');
+      if (!this.corsWarningShown) {
+        console.warn('Mycelium API not accessible from deployed site due to CORS restrictions');
+        this.corsWarningShown = true;
+      }
       return false;
     }
     
