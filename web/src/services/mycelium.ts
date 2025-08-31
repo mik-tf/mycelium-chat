@@ -6,8 +6,10 @@ export class MyceliumAPI {
   private baseURL = 'http://localhost:8989/api/v1';
   private client = axios.create({
     baseURL: this.baseURL,
-    timeout: 30000,
+    timeout: 5000, // Shorter timeout for connection detection
   });
+  private isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  private corsBlocked = false;
 
   /**
    * Send a message to a specific recipient or broadcast
@@ -93,10 +95,16 @@ export class MyceliumAPI {
         peers: response.data?.peers?.length || 0
       };
     } catch (error) {
+      // Check if this is a CORS error
+      if (error instanceof Error && (error.message.includes('CORS') || error.message.includes('Network Error'))) {
+        this.corsBlocked = true;
+      }
+      
       console.error('Failed to get node info:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Mycelium not available'
+        error: this.corsBlocked ? 'CORS blocked - use localhost for Mycelium access' : 
+               (error instanceof Error ? error.message : 'Mycelium not available')
       };
     }
   }
@@ -173,7 +181,28 @@ export class MyceliumAPI {
    * Check if Mycelium daemon is available
    */
   async isAvailable(): Promise<boolean> {
+    // If we're on a deployed site (not localhost), Mycelium won't be accessible due to CORS
+    if (!this.isLocalhost) {
+      console.warn('Mycelium API not accessible from deployed site due to CORS restrictions');
+      return false;
+    }
+    
     const info = await this.getNodeInfo();
     return info.success;
+  }
+  
+  /**
+   * Get mock Mycelium address for development/demo purposes
+   */
+  getMockAddress(): string {
+    // Generate a realistic-looking Mycelium address
+    return '400:8f3b:7c2a:1d4e:9a6f:2b8c:5e1a:3f7d';
+  }
+  
+  /**
+   * Check if we're in a CORS-blocked environment
+   */
+  isCorsBlocked(): boolean {
+    return !this.isLocalhost;
   }
 }

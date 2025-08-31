@@ -28,6 +28,9 @@ export const Header: React.FC = () => {
   };
 
   const getStatusText = () => {
+    if (myceliumAPI.isCorsBlocked()) {
+      return 'Mycelium (CORS Blocked - Use Localhost)';
+    }
     switch (myceliumStatus) {
       case 'connected': return 'Connected to Mycelium';
       case 'disconnected': return 'Mycelium Disconnected';
@@ -89,8 +92,13 @@ export const Header: React.FC = () => {
                     TF Connect: {tfProfile?.id}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {myceliumProfile?.myceliumAddress}
+                    Mycelium: {myceliumAPI.isCorsBlocked() ? myceliumAPI.getMockAddress() : (myceliumProfile?.myceliumAddress || 'Not connected')}
                   </p>
+                  {myceliumAPI.isCorsBlocked() && (
+                    <p className="text-xs text-orange-600">
+                      ⚠️ Use localhost for full Mycelium access
+                    </p>
+                  )}
                 </div>
                 
                 <button
