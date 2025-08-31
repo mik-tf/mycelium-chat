@@ -114,6 +114,7 @@ Licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for det
 ## Links
 
 - [Mycelium Network](https://github.com/threefoldtech/mycelium)
-- [MyceliumFlut](https://github.com/threefoldtech/myceliumflut)
+- [Matrix Protocol](https://matrix.org/)
+- [Element Web Client](https://github.com/vector-im/element-web)
+- [Synapse Homeserver](https://github.com/matrix-org/synapse)
 - [ThreeFold Connect](https://github.com/threefoldtech/threefold_connect)
-- [ChatScope UI Kit](https://github.com/chatscope/chat-ui-kit-react)
