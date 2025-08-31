@@ -1,0 +1,148 @@
+{
+  "default_server_config": {
+    "m.homeserver": {
+      "base_url": "https://matrix.threefold.pro",
+      "server_name": "threefold.pro"
+    },
+    "m.identity_server": {
+      "base_url": "https://vector.im"
+    }
+  },
+  "default_server_name": "threefold.pro",
+  "disable_custom_urls": false,
+  "disable_guests": true,
+  "disable_login_language_selector": false,
+  "disable_3pid_login": true,
+  "brand": "Mycelium Chat",
+  "integrations_ui_url": "https://scalar.vector.im/",
+  "integrations_rest_url": "https://scalar.vector.im/api",
+  "integrations_widgets_urls": [
+    "https://scalar.vector.im/_matrix/integrations/v1",
+    "https://scalar.vector.im/api"
+  ],
+  "bug_report_endpoint_url": "https://github.com/threefoldtech/mycelium-chat/issues/new",
+  "uisi_autorageshake_app": "mycelium-chat",
+  "showLabsSettings": true,
+  "default_theme": "dark",
+  "custom_themes": [
+    {
+      "name": "ThreeFold",
+      "is_dark": false,
+      "colors": {
+        "accent-color": "#1a73e8",
+        "primary-color": "#667eea",
+        "warning-color": "#ff9800",
+        "alert-color": "#f44336",
+        "sidebar-color": "#f5f5f5",
+        "roomlist-background-color": "#ffffff",
+        "roomlist-text-color": "#2d3748",
+        "roomlist-text-secondary-color": "#718096",
+        "timeline-background-color": "#ffffff",
+        "timeline-text-color": "#2d3748"
+      }
+    },
+    {
+      "name": "ThreeFold Dark",
+      "is_dark": true,
+      "colors": {
+        "accent-color": "#4fc3f7",
+        "primary-color": "#764ba2",
+        "warning-color": "#ffb74d",
+        "alert-color": "#ef5350",
+        "sidebar-color": "#1a202c",
+        "roomlist-background-color": "#2d3748",
+        "roomlist-text-color": "#e2e8f0",
+        "roomlist-text-secondary-color": "#a0aec0",
+        "timeline-background-color": "#2d3748",
+        "timeline-text-color": "#e2e8f0"
+      }
+    }
+  ],
+  "roomDirectory": {
+    "servers": [
+      "threefold.pro",
+      "matrix.org"
+    ]
+  },
+  "enable_presence_by_hs_url": {
+    "https://matrix.org": false,
+    "https://matrix-client.matrix.org": false,
+    "https://matrix.threefold.pro": true
+  },
+  "terms_and_conditions_links": [
+    {
+      "text": "Privacy Policy",
+      "url": "https://threefold.io/privacy"
+    },
+    {
+      "text": "Terms of Service",
+      "url": "https://threefold.io/terms"
+    }
+  ],
+  "sso_redirect_options": {
+    "immediate": false,
+    "on_welcome_page": true
+  },
+  "embedded_pages": {
+    "welcome_url": "welcome.html",
+    "home_url": "welcome.html"
+  },
+  "branding": {
+    "welcome_background_url": "themes/threefold/img/backgrounds/lake.jpg",
+    "auth_header_logo_url": "themes/threefold/img/logos/threefold-logo.svg",
+    "auth_footer_links": [
+      {"text": "About ThreeFold", "url": "https://threefold.io"},
+      {"text": "Community", "url": "https://forum.threefold.io"},
+      {"text": "Support", "url": "https://github.com/threefoldtech/mycelium-chat/issues"}
+    ]
+  },
+  "element_call": {
+    "url": "https://call.element.io",
+    "participant_limit": 8,
+    "brand": "Element Call"
+  },
+  "map_style_url": "https://api.maptiler.com/maps/streets/style.json?key=fU3vlMsMn4Jb6dnEIFsx",
+  "features": {
+    "feature_new_spinner": true,
+    "feature_pinning": true,
+    "feature_custom_status": true,
+    "feature_custom_tags": true,
+    "feature_state_counters": true,
+    "feature_many_integration_managers": false,
+    "feature_mjolnir": true,
+    "feature_dm_verification": true,
+    "feature_bridge_state": true,
+    "feature_presence_in_room_list": true,
+    "feature_custom_themes": true,
+    "feature_spaces": true,
+    "feature_voice_messages": true,
+    "feature_location_share": false,
+    "feature_polls": true,
+    "feature_thread": true,
+    "feature_latex_maths": true,
+    "feature_element_call_video_rooms": false,
+    "feature_group_calls": false,
+    "feature_video_rooms": false,
+    "feature_knock": true,
+    "feature_ask_to_join": true
+  },
+  "default_federate": true,
+  "default_guest_access": "can_join",
+  "default_history_visibility": "shared",
+  "permalink_prefix": "https://chat.threefold.pro",
+  "update_base_url": "https://packages.riot.im/desktop/update/",
+  "cross_origin_renderer_url": "https://usercontent.riot.im/v1.html",
+  "login_for_welcome_user_id": "@welcome:threefold.pro",
+  "analytics_owner": "ThreeFold",
+  "privacy_policy_url": "https://threefold.io/privacy",
+  "cookie_policy_url": "https://threefold.io/cookies",
+  "help_url": "https://github.com/threefoldtech/mycelium-chat/wiki",
+  "help_encryption_url": "https://github.com/threefoldtech/mycelium-chat/wiki/encryption",
+  "report_content_url": "https://forum.threefold.io/c/support",
+  "feedback_url": "https://forum.threefold.io/c/feedback",
+  "voice_broadcast": {
+    "chunk_length": 120,
+    "max_length": 14400
+  },
+  "logout_redirect_url": "welcome.html"
+}

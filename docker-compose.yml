@@ -1,0 +1,122 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database for Matrix homeserver
+  postgres:
+    image: postgres:15
+    container_name: mycelium-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: synapse
+      POSTGRES_USER: synapse
+      POSTGRES_PASSWORD: synapse_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U synapse"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Matrix Synapse homeserver
+  synapse:
+    image: matrixdotorg/synapse:latest
+    container_name: mycelium-synapse
+    restart: unless-stopped
+    ports:
+      - "8008:8008"
+      - "8448:8448"
+    volumes:
+      - ./synapse-config:/data
+      - ./auth-provider:/usr/local/lib/python3.11/site-packages/synapse_tf_connect
+    environment:
+      SYNAPSE_SERVER_NAME: matrix.localhost
+      SYNAPSE_REPORT_STATS: "no"
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: synapse
+      POSTGRES_USER: synapse
+      POSTGRES_PASSWORD: synapse_password
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      sh -c "
+        python -m synapse.app.homeserver --config-path /data/homeserver.yaml --generate-config --report-stats=no &&
+        python -m synapse.app.homeserver --config-path /data/homeserver.yaml
+      "
+
+  # Mycelium daemon
+  mycelium:
+    image: threefoldtech/mycelium:latest
+    container_name: mycelium-daemon
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./mycelium-config:/config
+      - mycelium_data:/data
+    command: ["--config", "/config/mycelium.toml", "--api-bind-address", "127.0.0.1:8989"]
+
+  # Matrix-Mycelium Bridge
+  bridge:
+    build:
+      context: .
+      dockerfile: bridge/Dockerfile
+    container_name: mycelium-bridge
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./bridge-config:/config
+      - bridge_data:/data
+    environment:
+      RUST_LOG: info
+    depends_on:
+      - synapse
+      - mycelium
+    command: ["--config", "/config/config.toml"]
+
+  # Discovery Service
+  discovery:
+    build:
+      context: .
+      dockerfile: discovery-service/Dockerfile
+    container_name: mycelium-discovery
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      RUST_LOG: info
+    command: ["--bind", "0.0.0.0:3000"]
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: mycelium-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx-config:/etc/nginx/conf.d
+      - ./element-config:/usr/share/nginx/html
+      - ./ssl:/etc/ssl/certs
+    depends_on:
+      - synapse
+      - bridge
+      - discovery
+
+  # Element Web (served by nginx)
+  element:
+    image: vectorim/element-web:latest
+    container_name: mycelium-element
+    volumes:
+      - ./element-config:/app/config
+    restart: unless-stopped
+    depends_on:
+      - nginx
+
+volumes:
+  postgres_data:
+  mycelium_data:
+  bridge_data:

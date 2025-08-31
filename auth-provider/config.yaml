@@ -1,0 +1,38 @@
+# TF Connect Authentication Provider Configuration
+tf_connect:
+  # TF Connect API endpoints
+  api_base_url: "https://login.threefold.me"
+  websocket_url: "wss://login.threefold.me/websocket"
+  
+  # Application configuration
+  app_id: "mycelium-chat"
+  redirect_uri: "https://chat.threefold.pro/auth/callback"
+  
+  # Development settings (override for local testing)
+  dev_mode: false
+  dev_api_base_url: "https://login.staging.threefold.me"
+  dev_websocket_url: "wss://login.staging.threefold.me/websocket"
+  
+  # Authentication settings
+  session_timeout: 3600  # 1 hour
+  token_refresh_threshold: 300  # 5 minutes before expiry
+  
+  # User mapping
+  user_id_template: "@{username}:matrix.localhost"
+  display_name_template: "{username}"
+  
+  # Logging
+  log_level: "INFO"
+  log_file: "/var/log/synapse/tf_connect_auth.log"
+  
+  # Rate limiting
+  max_login_attempts: 5
+  rate_limit_window: 300  # 5 minutes
+  
+  # Security
+  require_email_verification: true
+  allowed_domains: []  # Empty means all domains allowed
+  
+  # Cache settings
+  user_cache_ttl: 1800  # 30 minutes
+  token_cache_ttl: 3600  # 1 hour

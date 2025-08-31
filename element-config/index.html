@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Mycelium Chat - Decentralized Messaging</title>
+    <meta name="description" content="Secure, decentralized messaging powered by Matrix protocol and Mycelium P2P network" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#1a73e8" />
+    
+    <!-- Preconnect to improve loading performance -->
+    <link rel="preconnect" href="https://matrix.threefold.pro" />
+    <link rel="preconnect" href="https://discovery.threefold.pro" />
+    
+    <!-- Favicon and app icons -->
+    <link rel="icon" type="image/svg+xml" href="themes/threefold/img/logos/favicon.svg" />
+    <link rel="icon" type="image/png" href="themes/threefold/img/logos/favicon.png" />
+    <link rel="apple-touch-icon" href="themes/threefold/img/logos/apple-touch-icon.png" />
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="manifest.json" />
+    
+    <!-- Custom ThreeFold theme -->
+    <link rel="stylesheet" href="themes/threefold/theme.css" />
+    
+    <!-- Element Web CSS will be injected here -->
+    <style>
+        /* Loading screen styles */
+        .mx_LoadingScreen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .mx_LoadingScreen_logo {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .mx_LoadingScreen_text {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+        
+        .mx_LoadingScreen_subtitle {
+            font-size: 1em;
+            opacity: 0.8;
+            text-align: center;
+            max-width: 400px;
+            line-height: 1.5;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+        
+        /* Hide loading screen when Element loads */
+        .mx_MatrixChat .mx_LoadingScreen {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading screen shown while Element initializes -->
+    <div class="mx_LoadingScreen" id="loading-screen">
+        <div class="mx_LoadingScreen_logo">🌐</div>
+        <div class="mx_LoadingScreen_text">Mycelium Chat</div>
+        <div class="mx_LoadingScreen_subtitle">
+            Connecting to the decentralized Matrix network via Mycelium P2P...
+        </div>
+    </div>
+
+    <!-- Element Web will mount here -->
+    <div id="matrixchat"></div>
+    
+    <!-- Configuration script -->
+    <script>
+        // Global configuration for Element Web
+        window.mxMatrixClientPeg = window.mxMatrixClientPeg || {};
+        window.mxMatrixClientPeg.opts = window.mxMatrixClientPeg.opts || {};
+        
+        // Load configuration
+        fetch('config.json')
+            .then(response => response.json())
+            .then(config => {
+                window.mxMatrixClientPeg.opts.config = config;
+                
+                // Initialize Element Web
+                const script = document.createElement('script');
+                script.src = 'bundles/bundle.js';
+                script.onload = () => {
+                    // Hide loading screen once Element is loaded
+                    setTimeout(() => {
+                        const loadingScreen = document.getElementById('loading-screen');
+                        if (loadingScreen) {
+                            loadingScreen.style.opacity = '0';
+                            loadingScreen.style.transition = 'opacity 0.5s ease';
+                            setTimeout(() => {
+                                loadingScreen.style.display = 'none';
+                            }, 500);
+                        }
+                    }, 1000);
+                };
+                script.onerror = () => {
+                    document.getElementById('loading-screen').innerHTML = `
+                        <div class="mx_LoadingScreen_logo">⚠️</div>
+                        <div class="mx_LoadingScreen_text">Failed to Load</div>
+                        <div class="mx_LoadingScreen_subtitle">
+                            Unable to load Mycelium Chat. Please check your connection and try again.
+                            <br><br>
+                            <button onclick="location.reload()" style="
+                                background: rgba(255,255,255,0.2);
+                                border: 2px solid white;
+                                color: white;
+                                padding: 10px 20px;
+                                border-radius: 25px;
+                                cursor: pointer;
+                                font-size: 16px;
+                                margin-top: 20px;
+                            ">Retry</button>
+                        </div>
+                    `;
+                };
+                document.head.appendChild(script);
+            })
+            .catch(error => {
+                console.error('Failed to load configuration:', error);
+                document.getElementById('loading-screen').innerHTML = `
+                    <div class="mx_LoadingScreen_logo">⚠️</div>
+                    <div class="mx_LoadingScreen_text">Configuration Error</div>
+                    <div class="mx_LoadingScreen_subtitle">
+                        Failed to load application configuration. Please contact support.
+                    </div>
+                `;
+            });
+    </script>
+    
+    <!-- Service Worker for offline support -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

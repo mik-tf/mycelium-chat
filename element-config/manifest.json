@@ -1,0 +1,126 @@
+{
+  "name": "Mycelium Chat",
+  "short_name": "MyceliumChat",
+  "description": "Decentralized messaging powered by Matrix protocol and Mycelium P2P network",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a202c",
+  "theme_color": "#1a73e8",
+  "orientation": "portrait-primary",
+  "categories": ["communication", "social"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "themes/threefold/img/logos/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "themes/threefold/img/logos/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "themes/threefold/img/logos/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "themes/threefold/img/logos/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "themes/threefold/img/logos/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "themes/threefold/img/logos/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "themes/threefold/img/logos/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "themes/threefold/img/logos/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "themes/threefold/img/screenshots/desktop-chat.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Desktop chat interface"
+    },
+    {
+      "src": "themes/threefold/img/screenshots/mobile-chat.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mobile chat interface"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Start New Chat",
+      "short_name": "New Chat",
+      "description": "Start a new direct message or room",
+      "url": "/#/new",
+      "icons": [
+        {
+          "src": "themes/threefold/img/icons/new-chat.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Room Directory",
+      "short_name": "Rooms",
+      "description": "Browse public rooms",
+      "url": "/#/directory",
+      "icons": [
+        {
+          "src": "themes/threefold/img/icons/directory.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=im.vector.app",
+      "id": "im.vector.app"
+    },
+    {
+      "platform": "itunes",
+      "url": "https://apps.apple.com/app/vector/id1083446067",
+      "id": "1083446067"
+    }
+  ],
+  "prefer_related_applications": false,
+  "scope": "/",
+  "id": "mycelium-chat",
+  "protocol_handlers": [
+    {
+      "protocol": "matrix",
+      "url": "/#/room/%s"
+    }
+  ]
+}

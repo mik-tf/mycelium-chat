@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Mycelium Chat</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 600px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #fff, #e3f2fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .feature h3 {
+            margin-top: 0;
+            color: #e3f2fd;
+        }
+        .cta-button {
+            display: inline-block;
+            background: #1a73e8;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 20px 10px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .cta-button:hover {
+            background: #1557b0;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26, 115, 232, 0.4);
+        }
+        .secondary-button {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        .secondary-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        .network-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border-left: 4px solid #1a73e8;
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🌐</div>
+        <h1>Welcome to Mycelium Chat</h1>
+        <p class="subtitle">Decentralized messaging powered by Matrix protocol and Mycelium P2P network</p>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>🔒 Private & Secure</h3>
+                <p>End-to-end encryption with no central servers to compromise your privacy</p>
+            </div>
+            <div class="feature">
+                <h3>🌍 Truly Decentralized</h3>
+                <p>P2P federation via Mycelium network - no single point of failure</p>
+            </div>
+            <div class="feature">
+                <h3>🚀 Easy to Use</h3>
+                <p>Familiar Element interface with ThreeFold Connect authentication</p>
+            </div>
+        </div>
+
+        <div>
+            <button class="cta-button" onclick="loginWithTFConnect()">
+                Login with ThreeFold Connect
+            </button>
+            <a href="#" class="cta-button secondary-button" onclick="showGuestLogin()">
+                Continue as Guest
+            </a>
+        </div>
+
+        <div class="network-info">
+            <h3>🔗 Network Status</h3>
+            <p>Connected to <span id="server-count">...</span> homeservers across the Mycelium network</p>
+            <p><small>Your messages are distributed across multiple servers for maximum reliability</small></p>
+        </div>
+    </div>
+
+    <script>
+        // Load server count from discovery service
+        async function loadNetworkStatus() {
+            try {
+                const response = await fetch('https://discovery.threefold.pro/servers');
+                const data = await response.json();
+                document.getElementById('server-count').textContent = data.total || 'several';
+            } catch (error) {
+                document.getElementById('server-count').textContent = 'several';
+            }
+        }
+
+        function loginWithTFConnect() {
+            // Redirect to TF Connect authentication
+            window.location.href = '/_matrix/client/r0/login/tf_connect';
+        }
+
+        function showGuestLogin() {
+            // Show guest login options
+            alert('Guest login will be available in a future update. Please use ThreeFold Connect for now.');
+        }
+
+        // Initialize
+        loadNetworkStatus();
+    </script>
+</body>
+</html>
